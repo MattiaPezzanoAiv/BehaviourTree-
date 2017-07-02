@@ -13,6 +13,13 @@ namespace Mattia
         [HideInInspector]
         public Transform target;
 
+        //implement dictionary of object for player customizable reference
+
+        /// <summary>
+        /// TEMPORARY VARIABLE USED FOR EXECUTE EXAMPLE SCRIPTS. IN A REAL PROJECT THIS MUST BE OVERRIDED WITH A MORE COMPLEX INVENTORY SYSTEM.
+        /// </summary>
+        public bool hasKey = false;
+
         // Use this for initialization
         void Start()
         {
