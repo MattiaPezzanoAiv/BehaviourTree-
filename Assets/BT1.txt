@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<Selector>
-<Attacking>
-</Attacking>
-<Chasing>
-</Chasing>
-</Selector>

@@ -56,35 +56,19 @@ namespace Mattia
             lastPos = new Vector2(5, 5);
 
             //start code
-            //newFileCreatedName = GUI.TextField(new Rect(lastPos, defaultSize + new Vector2(30, 0)), newFileCreatedName);
-            //Tab(200);
-            //if (GUI.Button(new Rect(lastPos, defaultSize + new Vector2(30, 10)), new GUIContent("New Tree")))
-            //{
-            //    if (newFileCreatedName.Length <= 0)
-            //    {
-            //        Debug.LogError("Unable to create Tree. File name can't be empty.");
-            //        return;
-            //    }
-            //    if (!Directory.Exists(defaultPathForSavingXmlFile))
-            //        Directory.CreateDirectory(defaultPathForSavingXmlFile);
-            //    if (File.Exists(defaultPathForSavingXmlFile + newFileCreatedName + ".xml"))
-            //    {
-            //        Debug.LogError("File alredy exist, please change file name.");
-            //        return;
-            //    }
-            //    using (FileStream stream = File.Create(defaultPathForSavingXmlFile + newFileCreatedName + ".xml"))
-            //    {
-            //        byte[] bytes = Encoding.UTF8.GetBytes(defaultXmlFirstLine);
-            //        stream.Write(bytes,0,bytes.Length);
-            //    }
-            //    TextAsset textAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(defaultPathForSavingXmlFile + newFileCreatedName + ".xml");
-            //    btFile = textAsset;
-            //    newFileCreatedName = "";
-            //}
+            
             if (DeserializedNode == null)
             {
+
                 if (btFile == null)
                 {
+                    newFileCreatedName = GUI.TextField(new Rect(lastPos, defaultSize + new Vector2(30, 0)), newFileCreatedName);
+                    Tab(200);
+                    if (GUI.Button(new Rect(lastPos, defaultSize + new Vector2(30, 10)), new GUIContent("New Tree")))
+                    {
+                        CreateNewXmlFile();
+                    }
+
                     AddLine(80);
                     Rect pos = new Rect(new Vector2((position.width / 2) - (position.width / 2) / 2, lastPos.y), new Vector2(position.width / 2, position.height * 0.05f));
                     btFile = EditorGUI.ObjectField(pos, btFile, typeof(UnityEngine.Object), false);
@@ -115,8 +99,9 @@ namespace Mattia
 
             scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, true, true, GUILayout.Width(this.position.width), GUILayout.Height(this.position.height));
             GUILayout.BeginHorizontal();
-            AddLine();/*Tab(-200);*/
+            AddLine();
 
+            GUILayout.Label(new GUIContent(btFile.name));
             if (ModifiedTreeLastFrame)
                 SetParentToNodes(DeserializedNode);
             PrintNode(DeserializedNode); //printing tree
@@ -195,6 +180,31 @@ namespace Mattia
         void LeaveTab()
         {
             lastPos -= new Vector2(35, 0);
+        }
+        void CreateNewXmlFile(bool assignToEditor = true)
+        {
+            if (newFileCreatedName.Length <= 0)
+            {
+                Debug.LogError("Unable to create Tree. File name can't be empty.");
+                return;
+            }
+            if (!Directory.Exists(defaultPathForSavingXmlFile))
+                Directory.CreateDirectory(defaultPathForSavingXmlFile);
+            if (File.Exists(defaultPathForSavingXmlFile + newFileCreatedName + ".xml"))
+            {
+                Debug.LogError("File alredy exist, please change file name.");
+                return;
+            }
+            using (FileStream stream = File.Create(defaultPathForSavingXmlFile + newFileCreatedName + ".xml"))
+            {
+                byte[] bytes = Encoding.UTF8.GetBytes(defaultXmlFirstLine);
+                stream.Write(bytes, 0, bytes.Length);
+            }
+            AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+            if (!assignToEditor) return;
+            TextAsset textAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(defaultPathForSavingXmlFile + newFileCreatedName + ".xml");
+            btFile = textAsset;
+            newFileCreatedName = "";
         }
         void CreateRoot(object root)
         {
