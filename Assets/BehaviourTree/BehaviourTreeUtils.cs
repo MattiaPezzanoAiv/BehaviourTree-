@@ -79,6 +79,16 @@ namespace Mattia
             }
             return types;
         }
+
+        /// <summary>
+        /// Get if a type is a condition node
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static bool IsCondition(Type type)
+        {
+            return (type == typeof(Selector) || type == typeof(Sequence));
+        }
     }
 }
 

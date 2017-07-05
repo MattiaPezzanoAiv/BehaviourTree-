@@ -54,9 +54,8 @@ namespace Mattia
             scrollHeight = 0;
             scrollWidth = 0;
             lastPos = new Vector2(5, 5);
-
             //start code
-            
+
             if (DeserializedNode == null)
             {
 
@@ -82,7 +81,7 @@ namespace Mattia
                     SetParentToNodes(DeserializedNode);
             }
 
-            
+
             if (DeserializedNode == null)
             {
                 GenericMenu toolsMenu = new GenericMenu();
@@ -107,7 +106,7 @@ namespace Mattia
             PrintNode(DeserializedNode); //printing tree
 
             AddLine(); AddLine();
-            
+
 
             //utilities buttons
             if (GUI.Button(new Rect(lastPos, defaultSize * 2f), new GUIContent("Change Tree (don't save changes)"))) //change tree button
@@ -140,11 +139,25 @@ namespace Mattia
             {
                 GenericMenu toolsMenu = new GenericMenu();
                 toolsMenu.AddItem(new GUIContent("Delete", "Delete this node and all sub nodes"), false, Delete, node);
-                GUI.Label(new Rect(10, 10, 50, 50), GUI.tooltip);
                 foreach (var item in BehaviourTreeUtils.GetEnumerableOfType<Node>())
                 {
-                    toolsMenu.AddItem(new GUIContent(item.Name), false, AddChild, new ModifiedItem(item.AssemblyQualifiedName, node));
+                    if (BehaviourTreeUtils.IsCondition(item))
+                    {
+                        toolsMenu.AddItem(new GUIContent("Add Child/Conditions/" + item.Name), false, AddChild, new ModifiedItem(item.AssemblyQualifiedName, (Node)node));
+                        toolsMenu.AddItem(new GUIContent("Change/Conditions/" + item.Name), false, ChangeNode, new ModifiedItem(item.AssemblyQualifiedName, (Node)node));
+                    }
+                    else if (!BehaviourTreeUtils.IsCondition(item))
+                    {
+                        toolsMenu.AddItem(new GUIContent("Add Child/Behaviours/" + item.Name), false, AddChild, new ModifiedItem(item.AssemblyQualifiedName, (Node)node));
+                        toolsMenu.AddItem(new GUIContent("Change/Behaviours/" + item.Name), false, ChangeNode, new ModifiedItem(item.AssemblyQualifiedName, (Node)node));
+                    }
+                    else
+                    {
+                        toolsMenu.AddItem(new GUIContent("Add Child/Custom/" + item.Name), false, AddChild, new ModifiedItem(item.AssemblyQualifiedName, (Node)node));
+                        toolsMenu.AddItem(new GUIContent("Change/Custom/" + item.Name), false, ChangeNode, new ModifiedItem(item.AssemblyQualifiedName, (Node)node));
+                    }
                 }
+
                 toolsMenu.DropDown(new Rect(lastPos + new Vector2(30, 0), new Vector2(150, 25)));
             }
             if (node.GetChildCount() <= 0) return;
@@ -211,8 +224,6 @@ namespace Mattia
             Type t = (Type)root;
             Node rootNode = (Node)Activator.CreateInstance(t);
             DeserializedNode = rootNode;
-            //using (FileStream stream = new FileStream(string.Format("Assets/BehaviourTreeXml/" + btFile.name + ".xml"), FileMode.Create))
-            //    BehaviourTreeUtils.Serializer.Serialize(stream, rootNode);
         }
         void AddChild(object item)
         {
@@ -220,8 +231,6 @@ namespace Mattia
             Node newNode = (Node)Activator.CreateInstance(Type.GetType(modItem.newType));
             modItem.node.AddChild(newNode);
             ModifiedTreeLastFrame = true;
-            //using (FileStream stream = new FileStream(string.Format("Assets/BehaviourTreeXml/" + btFile.name + ".xml"), FileMode.Create))
-            //    BehaviourTreeUtils.Serializer.Serialize(stream, DeserializedNode);
         }
         void Delete(object editorNode)
         {
@@ -234,8 +243,13 @@ namespace Mattia
             }
             realNode.parent.Children.Remove(realNode);
             ModifiedTreeLastFrame = true;
-            //using (FileStream stream = new FileStream(string.Format("Assets/BehaviourTreeXml/" + btFile.name + ".xml"), FileMode.Create))
-            //    BehaviourTreeUtils.Serializer.Serialize(stream, DeserializedNode);
+        }
+        void ChangeNode(object modItem)
+        {
+            ModifiedItem item = (ModifiedItem)modItem;
+            Node newNode = (Node)Activator.CreateInstance(Type.GetType(item.newType));
+            item.node = newNode;
+            ModifiedTreeLastFrame = true;
         }
         /// <summary>
         /// Check all Tree and set correctly the parents of all nodes
