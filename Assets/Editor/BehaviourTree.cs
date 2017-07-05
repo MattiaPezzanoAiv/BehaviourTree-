@@ -143,18 +143,18 @@ namespace Mattia
                 {
                     if (BehaviourTreeUtils.IsCondition(item))
                     {
-                        toolsMenu.AddItem(new GUIContent("Add Child/Conditions/" + item.Name), false, AddChild, new ModifiedItem(item.AssemblyQualifiedName, (Node)node));
-                        toolsMenu.AddItem(new GUIContent("Change/Conditions/" + item.Name), false, ChangeNode, new ModifiedItem(item.AssemblyQualifiedName, (Node)node));
+                        toolsMenu.AddItem(new GUIContent("Add Child/Conditions/" + item.Name), false, AddChild, new ModifiedItem(item.AssemblyQualifiedName, node));
+                        toolsMenu.AddItem(new GUIContent("Change/Conditions/" + item.Name), false, ChangeNode, new ModifiedItem(item.AssemblyQualifiedName, node));
                     }
                     else if (!BehaviourTreeUtils.IsCondition(item))
                     {
-                        toolsMenu.AddItem(new GUIContent("Add Child/Behaviours/" + item.Name), false, AddChild, new ModifiedItem(item.AssemblyQualifiedName, (Node)node));
-                        toolsMenu.AddItem(new GUIContent("Change/Behaviours/" + item.Name), false, ChangeNode, new ModifiedItem(item.AssemblyQualifiedName, (Node)node));
+                        toolsMenu.AddItem(new GUIContent("Add Child/Behaviours/" + item.Name), false, AddChild, new ModifiedItem(item.AssemblyQualifiedName, node));
+                        toolsMenu.AddItem(new GUIContent("Change/Behaviours/" + item.Name), false, ChangeNode, new ModifiedItem(item.AssemblyQualifiedName, node));
                     }
                     else
                     {
-                        toolsMenu.AddItem(new GUIContent("Add Child/Custom/" + item.Name), false, AddChild, new ModifiedItem(item.AssemblyQualifiedName, (Node)node));
-                        toolsMenu.AddItem(new GUIContent("Change/Custom/" + item.Name), false, ChangeNode, new ModifiedItem(item.AssemblyQualifiedName, (Node)node));
+                        toolsMenu.AddItem(new GUIContent("Add Child/Custom/" + item.Name), false, AddChild, new ModifiedItem(item.AssemblyQualifiedName, node));
+                        toolsMenu.AddItem(new GUIContent("Change/Custom/" + item.Name), false, ChangeNode, new ModifiedItem(item.AssemblyQualifiedName, node));
                     }
                 }
 
@@ -244,11 +244,14 @@ namespace Mattia
             realNode.parent.Children.Remove(realNode);
             ModifiedTreeLastFrame = true;
         }
-        void ChangeNode(object modItem)
+        void ChangeNode(object item)
         {
-            ModifiedItem item = (ModifiedItem)modItem;
-            Node newNode = (Node)Activator.CreateInstance(Type.GetType(item.newType));
-            item.node = newNode;
+            ModifiedItem modItem = (ModifiedItem)item;
+            Node newNode = (Node)Activator.CreateInstance(Type.GetType(modItem.newType));
+            //modItem.node = newNode; //not work, but why?
+
+            int index = modItem.node.parent.Children.IndexOf(modItem.node);
+            modItem.node.parent.Children[index] = newNode;
             ModifiedTreeLastFrame = true;
         }
         /// <summary>
@@ -282,19 +285,20 @@ namespace Mattia
             AssetDatabase.Refresh();
         }
 
-        /// <summary>
-        /// Identify an object modified in a deserialized xml file.
-        /// </summary>
-        private class ModifiedItem
-        {
-            public string newType;
-            public Node node;
+        
+    }
+    /// <summary>
+    /// Identify an object modified in a deserialized xml file.
+    /// </summary>
+    public class ModifiedItem
+    {
+        public string newType;
+        public Node node;
 
-            public ModifiedItem(string t, Node n)
-            {
-                newType = t;
-                node = n;
-            }
+        public ModifiedItem(string t, Node n)
+        {
+            newType = t;
+            node = n;
         }
     }
 }

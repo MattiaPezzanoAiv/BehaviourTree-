@@ -30,7 +30,6 @@ namespace Mattia
                 return Children.Count;
             return 0;
         }
-
         /// <summary>
         /// Must be overrided, have the same function of Update() in MonoBehaviour. 
         /// </summary>
